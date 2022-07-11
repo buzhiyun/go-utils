@@ -9,6 +9,12 @@ type Conf interface {
 
 	// 重新加载配置文件
 	Reload() (err error)
+
+	// 扫描值
+	GetString(pattern string) (string, bool)
+	GetInt(pattern string) (int, bool)
+	GetInt64(pattern string) (int64, bool)
+	GetBool(pattern string) (bool, bool)
 }
 
 var config map[string]Conf

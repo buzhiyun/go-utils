@@ -118,6 +118,46 @@ func (c *ConfigFile) Get(pattern string) (value interface{}, success bool) {
 	return v, ok
 }
 
+// 扫描字符串值
+func (c *ConfigFile) GetString(pattern string) (value string, ok bool) {
+	v, ok := c.Get(pattern)
+	if ok {
+		value, ok = v.(string)
+		return
+	}
+	return
+}
+
+// 扫描int64值
+func (c *ConfigFile) GetInt64(pattern string) (value int64, ok bool) {
+	v, ok := c.Get(pattern)
+	if ok {
+		value, ok = v.(int64)
+		return
+	}
+	return
+}
+
+// 扫描int值
+func (c *ConfigFile) GetInt(pattern string) (value int, ok bool) {
+	v, ok := c.Get(pattern)
+	if ok {
+		value, ok = v.(int)
+		return
+	}
+	return
+}
+
+// 扫描bool值
+func (c *ConfigFile) GetBool(pattern string) (value bool, ok bool) {
+	v, ok := c.Get(pattern)
+	if ok {
+		value, ok = v.(bool)
+		return
+	}
+	return
+}
+
 // 重载文件
 func (c *ConfigFile) Reload() (err error) {
 	c.available = false
