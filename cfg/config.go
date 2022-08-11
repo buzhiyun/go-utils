@@ -1,6 +1,6 @@
 package cfg
 
-type Conf interface {
+type conf interface {
 	Available() (ok bool)
 
 	// Get 获取配置的内容 ， ok 的话就说明是读取到了
@@ -15,11 +15,12 @@ type Conf interface {
 	GetInt(pattern string) (int, bool)
 	GetInt64(pattern string) (int64, bool)
 	GetBool(pattern string) (bool, bool)
+	GetStrings(pattern string) ([]string, bool)
 }
 
-var config map[string]Conf
+var config map[string]conf
 
-func Config(filename ...string) Conf {
+func Config(filename ...string) conf {
 	var fName = ""
 	if len(filename) > 0 {
 		fName = filename[0]
@@ -32,10 +33,10 @@ func Config(filename ...string) Conf {
 
 	cfgFile, err := NewConfigFile(filename...)
 	if err != nil {
-		return &ConfigFile{available: false}
+		return &configFile{available: false}
 	}
 	if config == nil {
-		config = make(map[string]Conf)
+		config = make(map[string]conf)
 	}
 	config[fName] = cfgFile
 	return cfgFile

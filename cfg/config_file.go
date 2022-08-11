@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-type ConfigFile struct {
+type configFile struct {
 	fileName string // Default configuration file name.
 	fileType string
 	//searchPaths   *[]string // Searching path array.
@@ -20,20 +20,21 @@ type ConfigFile struct {
 }
 
 var (
-	supportedFileTypes = []string{"yaml"}
+	supportedFileTypes = []string{"yaml", "yml"}
 	SearchPath         = []string{
 		file.GetAppDir(),
+		filepath.Join(file.GetAppDir(), "config"),
 		file.GetWorkDir(),
 		file.GetHomeDir(),
 		os.TempDir(),
 	}
-	DefaultConfigFileName = "config"
+	DefaultconfigFileName = "config"
 )
 
 // 读取新的配置文件
-func NewConfigFile(file ...string) (*ConfigFile, error) {
+func NewConfigFile(file ...string) (*configFile, error) {
 	var (
-		name = DefaultConfigFileName
+		name = DefaultconfigFileName
 	)
 
 	if len(file) > 0 {
@@ -52,7 +53,7 @@ func NewConfigFile(file ...string) (*ConfigFile, error) {
 	// 对 yaml 处理
 	golog.Debugf("加载配置文件 %s", configPath)
 
-	if configType == "yaml" {
+	if configType == "yaml" || configType == "yml" {
 		if c, err := ioutil.ReadFile(configPath); err != nil {
 			golog.Errorf("读取配置文件错误 %s ", err.Error())
 			return nil, err
@@ -65,7 +66,7 @@ func NewConfigFile(file ...string) (*ConfigFile, error) {
 
 	}
 
-	cfg := &ConfigFile{
+	cfg := &configFile{
 		fileName:  configPath,
 		fileType:  configType,
 		configMap: cfgData,
@@ -90,7 +91,7 @@ func configFilePath(filename string) (configPath, configType string, exits bool)
 }
 
 // 获取配置的值
-func (c *ConfigFile) Get(pattern string) (value interface{}, success bool) {
+func (c *configFile) Get(pattern string) (value interface{}, success bool) {
 	cfgMap := c.configMap
 	var (
 		v  interface{}
@@ -119,7 +120,7 @@ func (c *ConfigFile) Get(pattern string) (value interface{}, success bool) {
 }
 
 // 扫描字符串值
-func (c *ConfigFile) GetString(pattern string) (value string, ok bool) {
+func (c *configFile) GetString(pattern string) (value string, ok bool) {
 	v, ok := c.Get(pattern)
 	if ok {
 		value, ok = v.(string)
@@ -128,8 +129,28 @@ func (c *ConfigFile) GetString(pattern string) (value string, ok bool) {
 	return
 }
 
+// 扫描字符串值
+func (c *configFile) GetStrings(pattern string) (value []string, ok bool) {
+	v, ok := c.Get(pattern)
+	if ok {
+		interfaceValues, ok := v.([]interface{})
+		if !ok {
+			return value, false
+		}
+		for _, v1 := range interfaceValues {
+			stringValue, ok := v1.(string)
+			if !ok {
+				return value, false
+			}
+			value = append(value, stringValue)
+			return value, true
+		}
+	}
+	return
+}
+
 // 扫描int64值
-func (c *ConfigFile) GetInt64(pattern string) (value int64, ok bool) {
+func (c *configFile) GetInt64(pattern string) (value int64, ok bool) {
 	v, ok := c.Get(pattern)
 	if ok {
 		value, ok = v.(int64)
@@ -139,7 +160,7 @@ func (c *ConfigFile) GetInt64(pattern string) (value int64, ok bool) {
 }
 
 // 扫描int值
-func (c *ConfigFile) GetInt(pattern string) (value int, ok bool) {
+func (c *configFile) GetInt(pattern string) (value int, ok bool) {
 	v, ok := c.Get(pattern)
 	if ok {
 		value, ok = v.(int)
@@ -149,7 +170,7 @@ func (c *ConfigFile) GetInt(pattern string) (value int, ok bool) {
 }
 
 // 扫描bool值
-func (c *ConfigFile) GetBool(pattern string) (value bool, ok bool) {
+func (c *configFile) GetBool(pattern string) (value bool, ok bool) {
 	v, ok := c.Get(pattern)
 	if ok {
 		value, ok = v.(bool)
@@ -159,7 +180,7 @@ func (c *ConfigFile) GetBool(pattern string) (value bool, ok bool) {
 }
 
 // 重载文件
-func (c *ConfigFile) Reload() (err error) {
+func (c *configFile) Reload() (err error) {
 	c.available = false
 	var cfgData map[string]interface{}
 	golog.Debugf("加载配置文件 %s", c.fileName)
@@ -184,6 +205,6 @@ func (c *ConfigFile) Reload() (err error) {
 }
 
 // 配置是否可用
-func (c *ConfigFile) Available() (ok bool) {
+func (c *configFile) Available() (ok bool) {
 	return c.available
 }
