@@ -21,20 +21,20 @@ type configFile struct {
 
 var (
 	supportedFileTypes = []string{"yaml", "yml"}
-	SearchPath         = []string{
+	searchPath         = []string{
 		file.GetAppDir(),
 		filepath.Join(file.GetAppDir(), "config"),
 		file.GetWorkDir(),
 		file.GetHomeDir(),
 		os.TempDir(),
 	}
-	DefaultconfigFileName = "config"
+	defaultconfigFileName = "config"
 )
 
 // 读取新的配置文件
-func NewConfigFile(file ...string) (*configFile, error) {
+func newConfigFile(file ...string) (*configFile, error) {
 	var (
-		name = DefaultconfigFileName
+		name = defaultconfigFileName
 	)
 
 	if len(file) > 0 {
@@ -78,7 +78,7 @@ func NewConfigFile(file ...string) (*configFile, error) {
 
 // 搜索配置文件路径
 func configFilePath(filename string) (configPath, configType string, exits bool) {
-	for _, dir := range SearchPath {
+	for _, dir := range searchPath {
 		for _, fileType := range supportedFileTypes {
 			cPath := filepath.Join(dir, filename+"."+fileType)
 			if file.FileExist(cPath) {

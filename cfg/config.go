@@ -31,7 +31,7 @@ func Config(filename ...string) conf {
 		}
 	}
 
-	cfgFile, err := NewConfigFile(filename...)
+	cfgFile, err := newConfigFile(filename...)
 	if err != nil {
 		return &configFile{available: false}
 	}
