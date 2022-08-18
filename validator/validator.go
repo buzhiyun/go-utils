@@ -129,6 +129,7 @@ func (v *validate) traverseField(ctx context.Context, parent reflect.Value, curr
 						structfieldLen: uint8(len(cf.name)),
 						param:          ct.param,
 						kind:           kind,
+						customErr:      cf.customErr,
 					},
 				)
 				return
@@ -154,6 +155,7 @@ func (v *validate) traverseField(ctx context.Context, parent reflect.Value, curr
 						param:          ct.param,
 						kind:           kind,
 						typ:            current.Type(),
+						customErr:      cf.customErr,
 					},
 				)
 				return
@@ -199,6 +201,7 @@ func (v *validate) traverseField(ctx context.Context, parent reflect.Value, curr
 								param:          ct.param,
 								kind:           kind,
 								typ:            typ,
+								customErr:      cf.customErr,
 							},
 						)
 						return
@@ -413,6 +416,7 @@ OUTER:
 								param:          ct.param,
 								kind:           kind,
 								typ:            typ,
+								customErr:      cf.customErr,
 							},
 						)
 
@@ -433,6 +437,7 @@ OUTER:
 								param:          ct.param,
 								kind:           kind,
 								typ:            typ,
+								customErr:      cf.customErr,
 							},
 						)
 					}
@@ -474,6 +479,7 @@ OUTER:
 						param:          ct.param,
 						kind:           kind,
 						typ:            typ,
+						customErr:      cf.customErr,
 					},
 				)
 

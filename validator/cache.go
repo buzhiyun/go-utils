@@ -80,6 +80,7 @@ type cField struct {
 	altName    string
 	namesEqual bool
 	cTags      *cTag
+	customErr  string
 }
 
 type cTag struct {
@@ -158,13 +159,13 @@ func (v *Validate) extractStructCache(current reflect.Value, sName string) *cStr
 			// elements of the field.
 			ctag = new(cTag)
 		}
-
 		cs.fields = append(cs.fields, &cField{
 			idx:        i,
 			name:       fld.Name,
 			altName:    customName,
 			cTags:      ctag,
 			namesEqual: fld.Name == customName,
+			customErr:  fld.Tag.Get("err_info"),
 		})
 	}
 	v.structCache.Set(typ, cs)

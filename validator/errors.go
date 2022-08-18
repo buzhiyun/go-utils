@@ -3,7 +3,6 @@ package validator
 import (
 	"bytes"
 	"fmt"
-	"github.com/kataras/golog"
 	"reflect"
 	"strings"
 )
@@ -179,6 +178,7 @@ type fieldError struct {
 	param          string
 	kind           reflect.Kind
 	typ            reflect.Type
+	customErr      string
 }
 
 // Tag returns the validation tag that failed.
@@ -251,6 +251,8 @@ func (fe *fieldError) Type() reflect.Type {
 
 // Error returns the fieldError's error message
 func (fe *fieldError) Error() string {
-	golog.Infof("fe.tag: %s", fe.tag)
+	if len(fe.customErr) > 0 {
+		return fe.customErr
+	}
 	return fmt.Sprintf(fieldErrMsg, fe.Field(), fe.tag)
 }
