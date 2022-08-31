@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/buzhiyun/go-utils/file"
 	"github.com/kataras/golog"
+	"github.com/mitchellh/mapstructure"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"os"
@@ -175,6 +176,19 @@ func (c *configFile) GetBool(pattern string) (value bool, ok bool) {
 	if ok {
 		value, ok = v.(bool)
 		return
+	}
+	return
+}
+
+// 扫描bool值
+func (c *configFile) Scan(pattern string, out interface{}) (ok bool) {
+	v, ok := c.Get(pattern)
+	if ok {
+		if err := mapstructure.Decode(v, &out); err != nil {
+			golog.Errorf("加载 %s 出错, %v", pattern, v)
+			return false
+		}
+		return true
 	}
 	return
 }
