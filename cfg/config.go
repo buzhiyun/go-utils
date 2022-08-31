@@ -16,6 +16,8 @@ type conf interface {
 	GetInt64(pattern string) (int64, bool)
 	GetBool(pattern string) (bool, bool)
 	GetStrings(pattern string) ([]string, bool)
+
+	Scan(pattern string, out interface{}) bool
 }
 
 var config map[string]conf
