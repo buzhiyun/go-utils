@@ -1,5 +1,7 @@
 package cfg
 
+import "sync"
+
 type conf interface {
 	Available() (ok bool)
 
@@ -20,7 +22,10 @@ type conf interface {
 	Scan(pattern string, out interface{}) bool
 }
 
-var config map[string]conf
+var (
+	config map[string]conf
+	cache  sync.Map
+)
 
 func Config(filename ...string) conf {
 	var fName = ""
