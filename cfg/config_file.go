@@ -143,9 +143,9 @@ func (c *configFile) Get(pattern string) (value interface{}, success bool) {
 
 // 扫描字符串值
 func (c *configFile) GetString(pattern string) (value string, ok bool) {
-	golog.Debugf("cache: %#v", c.cacheString)
+	//golog.Debugf("cache: %#v", c.cacheString)
 	if v, _ok := c.cacheString[pattern]; _ok {
-		golog.Debugf("cache ok: %#v", v)
+		//golog.Debugf("cache ok: %#v", v)
 		return v, _ok
 	}
 
