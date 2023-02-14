@@ -157,7 +157,7 @@ func (c *configFile) GetString(pattern string) (value string, ok bool) {
 	v, ok := c.Get(pattern)
 	if ok {
 		value, ok = v.(string)
-		golog.Debugf("string ok : %v", ok)
+		//golog.Debugf("string ok : %v", ok)
 		c.cacheString[pattern] = value
 		//if ok{
 		//	cacheString[c.name + "." + pattern] = value
