@@ -106,7 +106,7 @@ func configFilePath(filename string) (configPath, configType string, exits bool)
 func (c *configFile) Get(pattern string) (value interface{}, success bool) {
 	value, _ok := cache.Load(pattern)
 	if _ok {
-		return
+		return value, _ok
 	}
 
 	cfgMap := c.configMap
@@ -133,7 +133,7 @@ func (c *configFile) Get(pattern string) (value interface{}, success bool) {
 			ok = succ
 		}
 	}
-
+	//golog.Debugf("ok: %v", ok)
 	if ok {
 		cache.Store(pattern, v)
 	}
@@ -143,10 +143,12 @@ func (c *configFile) Get(pattern string) (value interface{}, success bool) {
 
 // 扫描字符串值
 func (c *configFile) GetString(pattern string) (value string, ok bool) {
+	golog.Debugf("cache: %#v", c.cacheString)
 	if v, _ok := c.cacheString[pattern]; _ok {
-		//golog.Debugf("%#v" , cacheString )
-		return v, ok
+		golog.Debugf("cache ok: %#v", v)
+		return v, _ok
 	}
+
 	//if v, _ok := cacheString[ c.name + "." + pattern]; _ok {
 	//	//golog.Debugf("%#v" , cacheString )
 	//	return v,ok
@@ -155,7 +157,7 @@ func (c *configFile) GetString(pattern string) (value string, ok bool) {
 	v, ok := c.Get(pattern)
 	if ok {
 		value, ok = v.(string)
-
+		golog.Debugf("string ok : %v", ok)
 		c.cacheString[pattern] = value
 		//if ok{
 		//	cacheString[c.name + "." + pattern] = value
@@ -169,7 +171,7 @@ func (c *configFile) GetString(pattern string) (value string, ok bool) {
 // 扫描字符串值
 func (c *configFile) GetStrings(pattern string) (value []string, ok bool) {
 	if v, _ok := c.cacheStrings[pattern]; _ok {
-		return v, ok
+		return v, _ok
 	}
 
 	v, ok := c.Get(pattern)
@@ -195,7 +197,7 @@ func (c *configFile) GetStrings(pattern string) (value []string, ok bool) {
 // 扫描int64值
 func (c *configFile) GetInt64(pattern string) (value int64, ok bool) {
 	if v, _ok := c.cacheInt64[pattern]; _ok {
-		return v, ok
+		return v, _ok
 	}
 
 	v, ok := c.Get(pattern)
@@ -213,7 +215,7 @@ func (c *configFile) GetInt64(pattern string) (value int64, ok bool) {
 // 扫描int值
 func (c *configFile) GetInt(pattern string) (value int, ok bool) {
 	if v, _ok := c.cacheInt[pattern]; _ok {
-		return v, ok
+		return v, _ok
 	}
 
 	v, ok := c.Get(pattern)
@@ -230,7 +232,7 @@ func (c *configFile) GetInt(pattern string) (value int, ok bool) {
 // 扫描bool值
 func (c *configFile) GetBool(pattern string) (value bool, ok bool) {
 	if v, _ok := c.cacheBool[pattern]; _ok {
-		return v, ok
+		return v, _ok
 	}
 
 	v, ok := c.Get(pattern)
