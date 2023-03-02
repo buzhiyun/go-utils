@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -109,6 +110,12 @@ func (c *configFile) Get(pattern string) (value interface{}, success bool) {
 		return value, _ok
 	}
 
+	// 没有指定文件的情况下，优先从环境变量里面找
+	_v := os.Getenv(pattern)
+	if len(_v) > 0 {
+		return _v, true
+	}
+
 	cfgMap := c.configMap
 	var (
 		v  interface{}
@@ -153,6 +160,12 @@ func (c *configFile) GetString(pattern string) (value string, ok bool) {
 	//	//golog.Debugf("%#v" , cacheString )
 	//	return v,ok
 	//}
+
+	// 没有指定文件的情况下，优先从环境变量里面找
+	_v := os.Getenv(pattern)
+	if len(_v) > 0 {
+		return _v, true
+	}
 
 	v, ok := c.Get(pattern)
 	if ok {
@@ -200,6 +213,14 @@ func (c *configFile) GetInt64(pattern string) (value int64, ok bool) {
 		return v, _ok
 	}
 
+	// 没有指定文件的情况下，优先从环境变量里面找
+	_v := os.Getenv(pattern)
+	if len(_v) > 0 {
+		if __v, err := strconv.ParseInt(_v, 10, 64); err == nil {
+			return __v, true
+		}
+	}
+
 	v, ok := c.Get(pattern)
 	if ok {
 		value, ok = v.(int64)
@@ -218,6 +239,14 @@ func (c *configFile) GetInt(pattern string) (value int, ok bool) {
 		return v, _ok
 	}
 
+	// 没有指定文件的情况下，优先从环境变量里面找
+	_v := os.Getenv(pattern)
+	if len(_v) > 0 {
+		if __v, err := strconv.Atoi(_v); err == nil {
+			return __v, true
+		}
+	}
+
 	v, ok := c.Get(pattern)
 	if ok {
 		value, ok = v.(int)
@@ -233,6 +262,17 @@ func (c *configFile) GetInt(pattern string) (value int, ok bool) {
 func (c *configFile) GetBool(pattern string) (value bool, ok bool) {
 	if v, _ok := c.cacheBool[pattern]; _ok {
 		return v, _ok
+	}
+
+	// 没有指定文件的情况下，优先从环境变量里面找
+	_v := os.Getenv(pattern)
+	if len(_v) > 0 {
+		_v = strings.ToLower(_v)
+		if _v == "true" {
+			return true, true
+		} else if _v == "false" {
+			return false, true
+		}
 	}
 
 	v, ok := c.Get(pattern)
