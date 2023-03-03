@@ -140,7 +140,6 @@ func (c *configFile) Get(pattern string) (value interface{}, success bool) {
 			ok = succ
 		}
 	}
-	//golog.Debugf("ok: %v", ok)
 	if ok {
 		cache.Store(pattern, v)
 	}
@@ -150,16 +149,9 @@ func (c *configFile) Get(pattern string) (value interface{}, success bool) {
 
 // 扫描字符串值
 func (c *configFile) GetString(pattern string) (value string, ok bool) {
-	//golog.Debugf("cache: %#v", c.cacheString)
 	if v, _ok := c.cacheString[pattern]; _ok {
-		//golog.Debugf("cache ok: %#v", v)
 		return v, _ok
 	}
-
-	//if v, _ok := cacheString[ c.name + "." + pattern]; _ok {
-	//	//golog.Debugf("%#v" , cacheString )
-	//	return v,ok
-	//}
 
 	// 没有指定文件的情况下，优先从环境变量里面找
 	_v := os.Getenv(pattern)
@@ -170,11 +162,7 @@ func (c *configFile) GetString(pattern string) (value string, ok bool) {
 	v, ok := c.Get(pattern)
 	if ok {
 		value, ok = v.(string)
-		golog.Debugf("string ok : %v", ok)
 		c.cacheString[pattern] = value
-		//if ok{
-		//	cacheString[c.name + "." + pattern] = value
-		//}
 
 		return
 	}
