@@ -5,7 +5,6 @@ import (
 	"github.com/buzhiyun/go-utils/log"
 	jsoniter "github.com/json-iterator/go"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"strings"
@@ -43,7 +42,7 @@ func HttpPostJson(url string, body interface{}) (responseBody []byte, err error)
 	}
 	defer resp.Body.Close()
 
-	responseBody, err = ioutil.ReadAll(resp.Body)
+	responseBody, err = io.ReadAll(resp.Body)
 
 	return
 }
@@ -60,7 +59,7 @@ func HttpGet(url string) (responseBody []byte, err error) {
 	}
 
 	defer resp.Body.Close()
-	responseBody, err = ioutil.ReadAll(resp.Body)
+	responseBody, err = io.ReadAll(resp.Body)
 	return
 }
 
@@ -116,7 +115,7 @@ func HttpPostFile(url string, formField map[string]string, fileName string, file
 	}
 	defer res.Body.Close()
 
-	responseBody, err = ioutil.ReadAll(res.Body)
+	responseBody, err = io.ReadAll(res.Body)
 	if err != nil {
 		log.Errorf("读取上传返回错误: %s", err)
 		return
@@ -141,7 +140,7 @@ func HttpGetWithBasicAuth(url, username, password string) (responseBody []byte, 
 	}
 
 	defer resp.Body.Close()
-	responseBody, err = ioutil.ReadAll(resp.Body)
+	responseBody, err = io.ReadAll(resp.Body)
 	return
 	//fmt.Println(string(body))
 }

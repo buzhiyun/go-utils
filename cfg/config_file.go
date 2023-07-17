@@ -6,7 +6,6 @@ import (
 	"github.com/buzhiyun/go-utils/log"
 	"github.com/mitchellh/mapstructure"
 	"gopkg.in/yaml.v3"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -62,7 +61,7 @@ func newConfigFile(file ...string) (*configFile, error) {
 	log.Debugf("加载配置文件 %s", configPath)
 
 	if configType == "yaml" || configType == "yml" {
-		if c, err := ioutil.ReadFile(configPath); err != nil {
+		if c, err := os.ReadFile(configPath); err != nil {
 			log.Errorf("读取配置文件错误 %s ", err.Error())
 			return nil, err
 		} else {
@@ -295,7 +294,7 @@ func (c *configFile) Reload() (err error) {
 
 	// 对 yaml 处理
 	if c.fileType == "yaml" {
-		if conf, err := ioutil.ReadFile(c.fileName); err != nil {
+		if conf, err := os.ReadFile(c.fileName); err != nil {
 			log.Errorf("读取配置文件错误 %s ", err.Error())
 			return err
 		} else {
