@@ -2,8 +2,8 @@ package http
 
 import (
 	"bytes"
+	"github.com/buzhiyun/go-utils/log"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/kataras/golog"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -18,7 +18,7 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 func HttpPostJson(url string, body interface{}) (responseBody []byte, err error) {
 	requestJson, err := json.Marshal(body)
 	if err != nil {
-		golog.Errorf("http 发送初始化失败，无法json参数, %v", body)
+		log.Errorf("http 发送初始化失败，无法json参数, %v", body)
 		return
 	}
 	//加上协议头
@@ -26,7 +26,7 @@ func HttpPostJson(url string, body interface{}) (responseBody []byte, err error)
 		url = "http://" + url
 	}
 
-	golog.Debugf("发送接口: %s ，body: %s", url, requestJson)
+	log.Debugf("发送接口: %s ，body: %s", url, requestJson)
 
 	req, err := http.NewRequest("POST", url, bytes.NewReader(requestJson))
 	if err != nil {
@@ -78,7 +78,7 @@ func HttpPostFile(url string, formField map[string]string, fileName string, file
 	io.Copy(part1, src)
 	_, errFile1 = io.Copy(part1, src)
 	if errFile1 != nil {
-		golog.Error(errFile1)
+		log.Error(errFile1)
 		return
 	}
 
@@ -90,7 +90,7 @@ func HttpPostFile(url string, formField map[string]string, fileName string, file
 
 	err = writer.Close()
 	if err != nil {
-		golog.Errorf("关闭 mime writer 错误: %s", err)
+		log.Errorf("关闭 mime writer 错误: %s", err)
 		return
 	}
 
@@ -103,25 +103,25 @@ func HttpPostFile(url string, formField map[string]string, fileName string, file
 
 	req, err := http.NewRequest(method, url, payload)
 
-	golog.Debugf("%s", payload.Bytes())
+	log.Debugf("%s", payload.Bytes())
 	if err != nil {
-		golog.Errorf("创建上传请求错误: %s", err)
+		log.Errorf("创建上传请求错误: %s", err)
 		return
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	res, err := client.Do(req)
 	if err != nil {
-		golog.Errorf("发送上传请求错误: %s", err)
+		log.Errorf("发送上传请求错误: %s", err)
 		return
 	}
 	defer res.Body.Close()
 
 	responseBody, err = ioutil.ReadAll(res.Body)
 	if err != nil {
-		golog.Errorf("读取上传返回错误: %s", err)
+		log.Errorf("读取上传返回错误: %s", err)
 		return
 	}
-	golog.Infof("上传成功，返回： %s", responseBody)
+	log.Infof("上传成功，返回： %s", responseBody)
 	return
 }
 

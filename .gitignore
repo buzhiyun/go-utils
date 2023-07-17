@@ -1,3 +1,7 @@
 *_test.go
 *.yaml
 vendor
+*/.git
+.idea
+*/.github
+*/benchmarks

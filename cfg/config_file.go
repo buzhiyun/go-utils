@@ -3,7 +3,7 @@ package cfg
 import (
 	"errors"
 	"github.com/buzhiyun/go-utils/file"
-	"github.com/kataras/golog"
+	"github.com/buzhiyun/go-utils/log"
 	"github.com/mitchellh/mapstructure"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
@@ -52,22 +52,22 @@ func newConfigFile(file ...string) (*configFile, error) {
 	configPath, configType, ok := configFilePath(name)
 
 	if !ok {
-		golog.Errorf("没有找到配置文件 %s", name)
+		log.Errorf("没有找到配置文件 %s", name)
 		return nil, errors.New("没有找到配置文件")
 	}
 
 	var cfgData map[string]interface{}
 
 	// 对 yaml 处理
-	golog.Debugf("加载配置文件 %s", configPath)
+	log.Debugf("加载配置文件 %s", configPath)
 
 	if configType == "yaml" || configType == "yml" {
 		if c, err := ioutil.ReadFile(configPath); err != nil {
-			golog.Errorf("读取配置文件错误 %s ", err.Error())
+			log.Errorf("读取配置文件错误 %s ", err.Error())
 			return nil, err
 		} else {
 			if err = yaml.Unmarshal(c, &cfgData); err != nil {
-				golog.Errorf("读取配置文件错误 %s , %s", configPath, err.Error())
+				log.Errorf("读取配置文件错误 %s , %s", configPath, err.Error())
 				return nil, err
 			}
 		}
@@ -279,7 +279,7 @@ func (c *configFile) Scan(pattern string, out interface{}) (ok bool) {
 	v, ok := c.Get(pattern)
 	if ok {
 		if err := mapstructure.Decode(v, &out); err != nil {
-			golog.Errorf("加载 %s 出错, %v", pattern, v)
+			log.Errorf("加载 %s 出错, %v", pattern, v)
 			return false
 		}
 		return true
@@ -291,16 +291,16 @@ func (c *configFile) Scan(pattern string, out interface{}) (ok bool) {
 func (c *configFile) Reload() (err error) {
 	c.available = false
 	var cfgData map[string]interface{}
-	golog.Debugf("加载配置文件 %s", c.fileName)
+	log.Debugf("加载配置文件 %s", c.fileName)
 
 	// 对 yaml 处理
 	if c.fileType == "yaml" {
 		if conf, err := ioutil.ReadFile(c.fileName); err != nil {
-			golog.Errorf("读取配置文件错误 %s ", err.Error())
+			log.Errorf("读取配置文件错误 %s ", err.Error())
 			return err
 		} else {
 			if err = yaml.Unmarshal(conf, &cfgData); err != nil {
-				golog.Errorf("读取配置文件错误 %s , %s", c.fileName, err.Error())
+				log.Errorf("读取配置文件错误 %s , %s", c.fileName, err.Error())
 				return err
 			}
 		}
