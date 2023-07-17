@@ -76,6 +76,15 @@ func AddOutput(writers ...io.Writer) {
 	zapCfg.Refresh()
 }
 
+func SetLevel(level string) {
+	zapCfg.Level = level
+	zapCfg.Refresh()
+}
+
+func Sync() {
+	_ = sugarLogger.Sync()
+}
+
 func RemoveAllOutput() {
 	zapCfg.AddOutput = nil
 	zapCfg.Refresh()
