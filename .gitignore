@@ -5,3 +5,4 @@ vendor
 .idea
 */.github
 */benchmarks
+*.DS_Store
