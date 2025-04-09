@@ -2,16 +2,21 @@ package http
 
 import (
 	"bytes"
-	"github.com/buzhiyun/go-utils/log"
-	jsoniter "github.com/json-iterator/go"
 	"io"
 	"mime/multipart"
 	"net/http"
+	neturl "net/url"
+
+	"github.com/buzhiyun/go-utils/log"
+	jsoniter "github.com/json-iterator/go"
+
 	"strings"
 	"time"
 )
 
-var http_client = &http.Client{}
+var http_client = &http.Client{
+	Timeout: time.Second * 10,
+}
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 func HttpPostJson(url string, body interface{}) (responseBody []byte, err error) {
@@ -36,6 +41,38 @@ func HttpPostJson(url string, body interface{}) (responseBody []byte, err error)
 	//req.Header.Set("Cookie", "name=anny")
 
 	http_client.Timeout = 5 * time.Second
+	resp, err := http_client.Do(req)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+
+	responseBody, err = io.ReadAll(resp.Body)
+
+	return
+}
+
+func HttpPostForm(url string, formData map[string]string) (responseBody []byte, err error) {
+	var body = neturl.Values{}
+	for k, v := range formData {
+		body.Set(k, v)
+	}
+
+	//加上协议头
+	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
+		url = "http://" + url
+	}
+
+	log.Debugf("发送接口: %s ，body: %s", url, body.Encode())
+	req, err := http.NewRequest("POST", url, strings.NewReader(body.Encode()))
+	if err != nil {
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	//req.Header.Set("Cookie", "name=anny")
+
+	// http_client.Timeout = 5 * time.Second
 	resp, err := http_client.Do(req)
 	if err != nil {
 		return
