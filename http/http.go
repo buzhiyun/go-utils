@@ -14,12 +14,30 @@ import (
 	"time"
 )
 
-var http_client = &http.Client{
-	Timeout: time.Second * 10,
-}
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
+var (
+	json        = jsoniter.ConfigCompatibleWithStandardLibrary
+	http_client *http.Client
+)
 
-func HttpPostJson(url string, body interface{}) (responseBody []byte, err error) {
+func setOption(client *http.Client, option ...HttpClientOption) {
+	for _, option := range option {
+		if option.Timeout != nil {
+			client.Timeout = *option.Timeout
+		}
+	}
+}
+
+func httpClient(option ...HttpClientOption) *http.Client {
+	if http_client != nil {
+		setOption(http_client, option...)
+		return &http.Client{}
+	}
+	_client := &http.Client{}
+	setOption(_client, option...)
+	return _client
+}
+
+func HttpPostJson(url string, body interface{}, option ...HttpClientOption) (responseBody []byte, err error) {
 	requestJson, err := json.Marshal(body)
 	if err != nil {
 		log.Errorf("http 发送初始化失败，无法json参数, %v", body)
@@ -40,8 +58,7 @@ func HttpPostJson(url string, body interface{}) (responseBody []byte, err error)
 	req.Header.Set("Content-Type", "application/json")
 	//req.Header.Set("Cookie", "name=anny")
 
-	http_client.Timeout = 5 * time.Second
-	resp, err := http_client.Do(req)
+	resp, err := httpClient().Do(req)
 	if err != nil {
 		return
 	}
@@ -52,7 +69,7 @@ func HttpPostJson(url string, body interface{}) (responseBody []byte, err error)
 	return
 }
 
-func HttpPostForm(url string, formData map[string]string) (responseBody []byte, err error) {
+func HttpPostForm(url string, formData map[string]string, option ...HttpClientOption) (responseBody []byte, err error) {
 	var body = neturl.Values{}
 	for k, v := range formData {
 		body.Set(k, v)
@@ -73,7 +90,7 @@ func HttpPostForm(url string, formData map[string]string) (responseBody []byte, 
 	//req.Header.Set("Cookie", "name=anny")
 
 	// http_client.Timeout = 5 * time.Second
-	resp, err := http_client.Do(req)
+	resp, err := httpClient().Do(req)
 	if err != nil {
 		return
 	}
@@ -84,23 +101,28 @@ func HttpPostForm(url string, formData map[string]string) (responseBody []byte, 
 	return
 }
 
-func HttpGet(url string) (responseBody []byte, err error) {
+func HttpGet(url string, option ...HttpClientOption) (responseBody []byte, err error) {
 	//加上协议头
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 		url = "http://" + url
 	}
 
-	resp, err := http.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	log.Debugf("发送接口: GET %s", url)
 	if err != nil {
 		return
 	}
+	res, err := httpClient().Do(req)
+	if err != nil {
+		return
+	}
+	defer res.Body.Close()
 
-	defer resp.Body.Close()
-	responseBody, err = io.ReadAll(resp.Body)
+	responseBody, err = io.ReadAll(res.Body)
 	return
 }
 
-func HttpPostFile(url string, formField map[string]string, fileName string, fileField string, src io.Reader) (responseBody []byte, err error) {
+func HttpPostFile(url string, formField map[string]string, fileName string, fileField string, src io.Reader, option ...HttpClientOption) (responseBody []byte, err error) {
 	method := "POST"
 
 	payload := &bytes.Buffer{}
@@ -130,8 +152,6 @@ func HttpPostFile(url string, formField map[string]string, fileName string, file
 		return
 	}
 
-	client := &http.Client{}
-
 	//加上协议头
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 		url = "http://" + url
@@ -145,7 +165,7 @@ func HttpPostFile(url string, formField map[string]string, fileName string, file
 		return
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	res, err := client.Do(req)
+	res, err := httpClient().Do(req)
 	if err != nil {
 		log.Errorf("发送上传请求错误: %s", err)
 		return
@@ -161,7 +181,7 @@ func HttpPostFile(url string, formField map[string]string, fileName string, file
 	return
 }
 
-func HttpGetWithBasicAuth(url, username, password string) (responseBody []byte, err error) {
+func HttpGetWithBasicAuth(url, username, password string, option ...HttpClientOption) (responseBody []byte, err error) {
 	//加上协议头
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 		url = "http://" + url
