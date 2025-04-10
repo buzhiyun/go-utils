@@ -3,5 +3,5 @@ package http
 import "time"
 
 type HttpClientOption struct {
-	Timeout *time.Duration
+	Timeout time.Duration
 }

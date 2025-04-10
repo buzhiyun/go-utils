@@ -21,8 +21,9 @@ var (
 
 func setOption(client *http.Client, option ...HttpClientOption) {
 	for _, option := range option {
-		if option.Timeout != nil {
-			client.Timeout = *option.Timeout
+		if option.Timeout != 0 {
+			log.Debugf("http client 设置 timeout %v", option.Timeout)
+			client.Timeout = option.Timeout
 		}
 	}
 }
@@ -58,7 +59,7 @@ func HttpPostJson(url string, body interface{}, option ...HttpClientOption) (res
 	req.Header.Set("Content-Type", "application/json")
 	//req.Header.Set("Cookie", "name=anny")
 
-	resp, err := httpClient().Do(req)
+	resp, err := httpClient(option...).Do(req)
 	if err != nil {
 		return
 	}
@@ -90,7 +91,7 @@ func HttpPostForm(url string, formData map[string]string, option ...HttpClientOp
 	//req.Header.Set("Cookie", "name=anny")
 
 	// http_client.Timeout = 5 * time.Second
-	resp, err := httpClient().Do(req)
+	resp, err := httpClient(option...).Do(req)
 	if err != nil {
 		return
 	}
@@ -112,7 +113,7 @@ func HttpGet(url string, option ...HttpClientOption) (responseBody []byte, err e
 	if err != nil {
 		return
 	}
-	res, err := httpClient().Do(req)
+	res, err := httpClient(option...).Do(req)
 	if err != nil {
 		return
 	}
@@ -165,7 +166,7 @@ func HttpPostFile(url string, formField map[string]string, fileName string, file
 		return
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	res, err := httpClient().Do(req)
+	res, err := httpClient(option...).Do(req)
 	if err != nil {
 		log.Errorf("发送上传请求错误: %s", err)
 		return
@@ -191,7 +192,7 @@ func HttpGetWithBasicAuth(url, username, password string, option ...HttpClientOp
 
 	req.SetBasicAuth(username, password)
 	http_client.Timeout = 5 * time.Second
-	resp, err := http_client.Do(req)
+	resp, err := httpClient(option...).Do(req)
 	if err != nil {
 		return
 	}
