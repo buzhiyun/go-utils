@@ -2,14 +2,15 @@ package cfg
 
 import (
 	"errors"
-	"github.com/buzhiyun/go-utils/file"
-	"github.com/buzhiyun/go-utils/log"
-	"github.com/mitchellh/mapstructure"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/buzhiyun/go-utils/file"
+	"github.com/buzhiyun/go-utils/log"
+	"github.com/mitchellh/mapstructure"
+	"gopkg.in/yaml.v3"
 )
 
 type configFile struct {
@@ -210,9 +211,9 @@ func (c *configFile) GetInt64(pattern string) (value int64, ok bool) {
 
 	v, ok := c.Get(pattern)
 	if ok {
-		value, ok = v.(int64)
-
-		if ok {
+		_value, _ok := v.(int)
+		if _ok {
+			value = int64(_value)
 			c.cacheInt64[pattern] = value
 		}
 		return
