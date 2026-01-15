@@ -38,7 +38,7 @@ func httpClient(option ...HttpClientOption) *http.Client {
 	return _client
 }
 
-func HttpPostJson(url string, body interface{}, option ...HttpClientOption) (responseBody []byte, err error) {
+func HttpPostJson(url string, body interface{}, headers map[string]string, option ...HttpClientOption) (responseBody []byte, err error) {
 	requestJson, err := json.Marshal(body)
 	if err != nil {
 		log.Errorf("http 发送初始化失败，无法json参数, %v", body)
@@ -58,6 +58,11 @@ func HttpPostJson(url string, body interface{}, option ...HttpClientOption) (res
 
 	req.Header.Set("Content-Type", "application/json")
 	//req.Header.Set("Cookie", "name=anny")
+	if headers != nil {
+		for k, v := range headers {
+			req.Header.Set(k, v)
+		}
+	}
 
 	resp, err := httpClient(option...).Do(req)
 	if err != nil {
@@ -70,7 +75,7 @@ func HttpPostJson(url string, body interface{}, option ...HttpClientOption) (res
 	return
 }
 
-func HttpPostForm(url string, formData map[string]string, option ...HttpClientOption) (responseBody []byte, err error) {
+func HttpPostForm(url string, formData map[string]string, headers map[string]string, option ...HttpClientOption) (responseBody []byte, err error) {
 	var body = neturl.Values{}
 	for k, v := range formData {
 		body.Set(k, v)
@@ -88,6 +93,11 @@ func HttpPostForm(url string, formData map[string]string, option ...HttpClientOp
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	if headers != nil {
+		for k, v := range headers {
+			req.Header.Set(k, v)
+		}
+	}
 	//req.Header.Set("Cookie", "name=anny")
 
 	// http_client.Timeout = 5 * time.Second
@@ -102,7 +112,7 @@ func HttpPostForm(url string, formData map[string]string, option ...HttpClientOp
 	return
 }
 
-func HttpGet(url string, option ...HttpClientOption) (responseBody []byte, err error) {
+func HttpGet(url string, headers map[string]string, option ...HttpClientOption) (responseBody []byte, err error) {
 	//加上协议头
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 		url = "http://" + url
@@ -113,6 +123,12 @@ func HttpGet(url string, option ...HttpClientOption) (responseBody []byte, err e
 	if err != nil {
 		return
 	}
+	if headers != nil {
+		for k, v := range headers {
+			req.Header.Set(k, v)
+		}
+	}
+
 	res, err := httpClient(option...).Do(req)
 	if err != nil {
 		return
@@ -123,7 +139,7 @@ func HttpGet(url string, option ...HttpClientOption) (responseBody []byte, err e
 	return
 }
 
-func HttpPostFile(url string, formField map[string]string, fileName string, fileField string, src io.Reader, option ...HttpClientOption) (responseBody []byte, err error) {
+func HttpPostFile(url string, formField map[string]string, fileName string, fileField string, src io.Reader, headers map[string]string, option ...HttpClientOption) (responseBody []byte, err error) {
 	method := "POST"
 
 	payload := &bytes.Buffer{}
@@ -166,6 +182,11 @@ func HttpPostFile(url string, formField map[string]string, fileName string, file
 		return
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
+	if headers != nil {
+		for k, v := range headers {
+			req.Header.Set(k, v)
+		}
+	}
 	res, err := httpClient(option...).Do(req)
 	if err != nil {
 		log.Errorf("发送上传请求错误: %s", err)
