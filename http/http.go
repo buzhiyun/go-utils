@@ -74,7 +74,7 @@ func HttpPostJson(url string, body interface{}, headers map[string]string, optio
 	return
 }
 
-func HttpPostJsonWithCtx(ctx context.Context, url string, body interface{}, headers map[string]string, option ...HttpClientOption) (responseBody []byte, err error) {
+func HttpPostJsonWithCtx(ctx context.Context, url string, body interface{}, headers map[string]string, option ...HttpClientOption) (responseBody []byte, statusCode int, err error) {
 	requestJson, err := json.Marshal(body)
 	if err != nil {
 		log.Errorf("http 发送初始化失败，无法json参数, %v", body)
@@ -99,9 +99,11 @@ func HttpPostJsonWithCtx(ctx context.Context, url string, body interface{}, head
 	}
 
 	resp, err := httpClient(option...).Do(req)
+	statusCode = resp.StatusCode
 	if err != nil {
 		return
 	}
+
 	defer resp.Body.Close()
 
 	responseBody, err = io.ReadAll(resp.Body)
@@ -144,7 +146,7 @@ func HttpPostForm(url string, formData map[string]string, headers map[string]str
 	return
 }
 
-func HttpPostFormWithCtx(ctx context.Context, url string, formData map[string]string, headers map[string]string, option ...HttpClientOption) (responseBody []byte, err error) {
+func HttpPostFormWithCtx(ctx context.Context, url string, formData map[string]string, headers map[string]string, option ...HttpClientOption) (responseBody []byte, statusCode int, err error) {
 	var body = neturl.Values{}
 	for k, v := range formData {
 		body.Set(k, v)
@@ -169,6 +171,7 @@ func HttpPostFormWithCtx(ctx context.Context, url string, formData map[string]st
 
 	// http_client.Timeout = 5 * time.Second
 	resp, err := httpClient(option...).Do(req)
+	statusCode = resp.StatusCode
 	if err != nil {
 		return
 	}
@@ -204,7 +207,7 @@ func HttpGet(url string, headers map[string]string, option ...HttpClientOption) 
 	return
 }
 
-func HttpGetWithCtx(ctx context.Context, url string, headers map[string]string, option ...HttpClientOption) (responseBody []byte, err error) {
+func HttpGetWithCtx(ctx context.Context, url string, headers map[string]string, option ...HttpClientOption) (responseBody []byte, statusCode int, err error) {
 	//加上协议头
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 		url = "http://" + url
@@ -220,6 +223,7 @@ func HttpGetWithCtx(ctx context.Context, url string, headers map[string]string, 
 	}
 
 	res, err := httpClient(option...).Do(req)
+	statusCode = res.StatusCode
 	if err != nil {
 		return
 	}
