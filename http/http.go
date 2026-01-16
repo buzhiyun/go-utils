@@ -2,6 +2,7 @@ package http
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -58,10 +59,43 @@ func HttpPostJson(url string, body interface{}, headers map[string]string, optio
 
 	req.Header.Set("Content-Type", "application/json")
 	//req.Header.Set("Cookie", "name=anny")
-	if headers != nil {
-		for k, v := range headers {
-			req.Header.Set(k, v)
-		}
+	for k, v := range headers {
+		req.Header.Set(k, v)
+	}
+
+	resp, err := httpClient(option...).Do(req)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+
+	responseBody, err = io.ReadAll(resp.Body)
+
+	return
+}
+
+func HttpPostJsonWithCtx(ctx context.Context, url string, body interface{}, headers map[string]string, option ...HttpClientOption) (responseBody []byte, err error) {
+	requestJson, err := json.Marshal(body)
+	if err != nil {
+		log.Errorf("http 发送初始化失败，无法json参数, %v", body)
+		return
+	}
+	//加上协议头
+	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
+		url = "http://" + url
+	}
+
+	log.Debugf("发送接口: %s ，body: %s", url, requestJson)
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(requestJson))
+	if err != nil {
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	//req.Header.Set("Cookie", "name=anny")
+	for k, v := range headers {
+		req.Header.Set(k, v)
 	}
 
 	resp, err := httpClient(option...).Do(req)
@@ -93,10 +127,43 @@ func HttpPostForm(url string, formData map[string]string, headers map[string]str
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	if headers != nil {
-		for k, v := range headers {
-			req.Header.Set(k, v)
-		}
+	for k, v := range headers {
+		req.Header.Set(k, v)
+	}
+	//req.Header.Set("Cookie", "name=anny")
+
+	// http_client.Timeout = 5 * time.Second
+	resp, err := httpClient(option...).Do(req)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+
+	responseBody, err = io.ReadAll(resp.Body)
+
+	return
+}
+
+func HttpPostFormWithCtx(ctx context.Context, url string, formData map[string]string, headers map[string]string, option ...HttpClientOption) (responseBody []byte, err error) {
+	var body = neturl.Values{}
+	for k, v := range formData {
+		body.Set(k, v)
+	}
+
+	//加上协议头
+	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
+		url = "http://" + url
+	}
+
+	log.Debugf("发送接口: %s ，body: %s", url, body.Encode())
+	req, err := http.NewRequestWithContext(ctx, "POST", url, strings.NewReader(body.Encode()))
+	if err != nil {
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	for k, v := range headers {
+		req.Header.Set(k, v)
 	}
 	//req.Header.Set("Cookie", "name=anny")
 
@@ -123,10 +190,33 @@ func HttpGet(url string, headers map[string]string, option ...HttpClientOption) 
 	if err != nil {
 		return
 	}
-	if headers != nil {
-		for k, v := range headers {
-			req.Header.Set(k, v)
-		}
+	for k, v := range headers {
+		req.Header.Set(k, v)
+	}
+
+	res, err := httpClient(option...).Do(req)
+	if err != nil {
+		return
+	}
+	defer res.Body.Close()
+
+	responseBody, err = io.ReadAll(res.Body)
+	return
+}
+
+func HttpGetWithCtx(ctx context.Context, url string, headers map[string]string, option ...HttpClientOption) (responseBody []byte, err error) {
+	//加上协议头
+	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
+		url = "http://" + url
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	log.Debugf("发送接口: GET %s", url)
+	if err != nil {
+		return
+	}
+	for k, v := range headers {
+		req.Header.Set(k, v)
 	}
 
 	res, err := httpClient(option...).Do(req)
@@ -182,10 +272,8 @@ func HttpPostFile(url string, formField map[string]string, fileName string, file
 		return
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	if headers != nil {
-		for k, v := range headers {
-			req.Header.Set(k, v)
-		}
+	for k, v := range headers {
+		req.Header.Set(k, v)
 	}
 	res, err := httpClient(option...).Do(req)
 	if err != nil {
