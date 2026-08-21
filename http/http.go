@@ -12,12 +12,11 @@ import (
 	jsoniter "github.com/json-iterator/go"
 
 	"strings"
-	"time"
 )
 
 var (
-	json        = jsoniter.ConfigCompatibleWithStandardLibrary
-	http_client *http.Client
+	json = jsoniter.ConfigCompatibleWithStandardLibrary
+	// http_client *http.Client
 )
 
 func setOption(client *http.Client, option ...HttpClientOption) {
@@ -30,10 +29,10 @@ func setOption(client *http.Client, option ...HttpClientOption) {
 }
 
 func httpClient(option ...HttpClientOption) *http.Client {
-	if http_client != nil {
-		setOption(http_client, option...)
-		return &http.Client{}
-	}
+	// if http_client != nil {
+	// 	setOption(http_client, option...)
+	// 	return &http.Client{}
+	// }
 	_client := &http.Client{}
 	setOption(_client, option...)
 	return _client
@@ -304,7 +303,7 @@ func HttpGetWithBasicAuth(url, username, password string, option ...HttpClientOp
 	req, err := http.NewRequest("GET", url, nil)
 
 	req.SetBasicAuth(username, password)
-	http_client.Timeout = 5 * time.Second
+	// http_client.Timeout = 5 * time.Second
 	resp, err := httpClient(option...).Do(req)
 	if err != nil {
 		return
